@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: pg_pw1234
+      POSTGRES_DB: pg_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  neo4j:
+    image: neo4j:latest
+    environment:
+      NEO4J_AUTH: neo4j/test1234
+    volumes:
+      - neo4jdata:/data
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt protocol
+    networks:
+      - backend
+
+
+  fastapi:
+    build:
+      context: ./backend/api
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - neo4j
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+  neo4jdata:
+
+networks:
+  backend:
